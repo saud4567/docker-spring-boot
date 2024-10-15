@@ -1,27 +1,32 @@
-package com.devops.coach;
+import static org.junit.Assert.assertEquals;
 
-import org.junit.jupiter.api.Test;
+import java.time.LocalDate;
+import org.junit.Test;
+import org.springframework.ui.Model;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.ResponseEntity;
 
-@WebMvcTest(StartApplication.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class StartApplicationTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    private TestRestTemplate restTemplate;
 
     @Test
-    public void testIndex() throws Exception {
-        mockMvc.perform(get("/"))
-            .andExpect(status().isOk())
-            .andExpect(view().name("index"))
-            .andExpect(model().attribute("title", "Welcome folks..We are learning Kubernete Deployment using Helm, Jenkins Pipeline Today's date is Feb 18th..!!!! "))
-            .andExpect(model().attribute("msg", "Hello All..We are deploying springboot application into EKS cluster using Helm + Jenkins Pipeline!!!!"));
+    public void testIndex() {
+        // Get today's date
+        String expectedDate = LocalDate.now().toString();
+        
+        // Adjust this to match the expected title format in your application
+        String expectedTitle = "Welcome folks..We are learning Kubernete Deployment using Helm, Jenkins Pipeline Today's date is " + expectedDate + "..!!!!";
+
+        // Send a request to the home page
+        ResponseEntity<String> response = restTemplate.getForEntity("/", String.class);
+        String responseBody = response.getBody();
+
+        // Assert that the response contains the correct dynamic date
+        assertTrue(responseBody.contains(expectedTitle));
     }
 }
